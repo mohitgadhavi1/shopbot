@@ -91,26 +91,8 @@ To develop a sales chatbot that enhances the shopping experience by:
 - ✅ Presentation Slide Deck:
   - Project goals, architecture, design choices, and key takeaways.
 
----
 
-## 🧠 Suggested Tools
 
-- **Frontend**: React.js, Vue.js, or similar
-- **Backend**: Flask / Django (Python)
-- **Database**: SQLite / PostgreSQL / MySQL
-- **APIs**: RESTful architecture
-- **Session/State**: JWT or session cookies
-- **Hosting (optional)**: Render, Vercel, or local setup
 
----
 
-## 📌 Notes
-
-- Choose a specific product category to keep the chatbot focused.
-- Ensure the chatbot simulates realistic conversations and understands multiple user intents (search, filter, buy, etc.).
-- Store conversations in a way that can be later analyzed for improvements.
-
----
-
-> Feel free to modify this file based on your implementation. Good documentation can significantly boost project impact and clarity.
 
