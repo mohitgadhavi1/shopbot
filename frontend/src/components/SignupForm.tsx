@@ -11,10 +11,10 @@ import {
 } from "lucide-react";
 
 interface SignupFormProps {
-  onSignupSuccess: () => void;
+  onLoginSuccess: (access: string) => void;
 }
 
-export function SignupForm({ onSignupSuccess }: SignupFormProps) {
+export function SignupForm({ onLoginSuccess }: SignupFormProps) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,6 +48,7 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
   const getPasswordStrengthText = () => {
     if (passwordStrength <= 2) return "Weak";
     if (passwordStrength <= 3) return "Medium";
+    return "Medium";
     return "Strong";
   };
 
@@ -87,14 +88,12 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
       }
 
       const tokenData = await loginRes.json();
+      const { access } = tokenData;
 
-      localStorage.setItem("access", tokenData.access);
-      localStorage.setItem("refresh", tokenData.refresh);
-
-      // Step 3: Success
+      // Step 3: Success - Pass tokens to parent component
       setSuccess(true);
       setTimeout(() => {
-        onSignupSuccess();
+        onLoginSuccess(access); // Pass tokens to parent
       }, 1000);
     } catch (err: unknown) {
       setError((err as Error).message || "Something went wrong");
