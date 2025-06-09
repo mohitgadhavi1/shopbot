@@ -81,7 +81,7 @@ export function SignupForm({ onLoginSuccess }: SignupFormProps) {
 
       // Step 2: Login to get JWT tokens
       const loginRes = await fetch(
-        "http://https://shopbot-jla9.onrender.com/api/token/",
+        "https://shopbot-jla9.onrender.com/api/token/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

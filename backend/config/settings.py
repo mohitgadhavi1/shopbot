@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",                       # for local development
     "https://shopbot-frontend.vercel.app",         # deployed frontend domain
-    "https://shopbot-jla9.onrender.com",           # optional, for API-to-API calls
+    "https://shopbot-jla9.onrender.com",        # optional, for API-to-API calls
 ]
 
 
