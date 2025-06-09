@@ -60,7 +60,7 @@ export function SignupForm({ onLoginSuccess }: SignupFormProps) {
     try {
       // Step 1: Signup
       const res = await fetch(
-        "http://https://shopbot-jla9.onrender.com/api/auth/signup/",
+        "https://shopbot-jla9.onrender.com/api/auth/signup/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
