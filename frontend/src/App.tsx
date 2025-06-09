@@ -9,6 +9,8 @@ import {
   X,
 } from "lucide-react";
 
+import AuthModal from "./components/Modal.tsx";
+
 interface Product {
   id: number;
   name: string;
@@ -50,15 +52,40 @@ const EcommerceChatbot = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartCount, setCartCount] = useState<number>(0);
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    console.log(!!localStorage.getItem("access"));
+    setIsLoggedIn(!!localStorage.getItem("access"));
+  }, []);
+
+  const [showModal, setShowModal] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setIsLoggedIn(false);
+    setShowModal(true);
+  };
 
   // Mock product data
   useEffect(() => {
-    fetch("http://localhost:8000/api/products/")
-      .then((res) => res.json())
-      .then((data: Product[]) => setProducts(data))
-      .catch((err) => console.error("Error:", err));
-  }, []);
+    const accessToken = localStorage.getItem("access");
+    console.log(accessToken);
+    {
+      const accessToken = localStorage.getItem("access");
+      if (isLoggedIn && accessToken) {
+        fetch("http://localhost:8000/api/products/", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data: Product[]) => setProducts(data))
+          .catch((err) => console.error("Error:", err));
+      }
+    }
+  }, [isLoggedIn]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -263,174 +290,195 @@ const EcommerceChatbot = () => {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 w-screen ">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between ">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-amber-200-600 rounded-lg flex items-center justify-center">
-            <img src="/vite.svg" alt="Vite Logo" className="w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="font-semibold text-gray-900 line-clamp-4">
-              ShopBot
-            </h1>
-            <p className="text-xs text-gray-500">Online • Ready to help</p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          <button className="relative p-2 text-gray-500 hover:bg-gray-100 cursor-pointer rounded-lg ">
-            <ShoppingCart className="w-5 h-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </button>
-          <button className="p-2 text-gray-500 hover:bg-gray-100 cursor-pointer  rounded-lg">
-            <Filter className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.type === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl ${
-                message.type === "user"
-                  ? "bg-blue-600 text-white rounded-l-2xl rounded-tr-2xl rounded-br-sm"
-                  : "bg-white text-gray-900 rounded-r-2xl rounded-tl-2xl rounded-bl-sm shadow-sm border border-gray-100"
-              } px-4 py-3`}
-            >
-              <p className="text-sm">{message.content}</p>
-
-              {message.products && message.products.length > 0 && (
-                <div className="mt-4 space-y-3">
-                  <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                    {message.products.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <p className="text-xs opacity-70 mt-2">
-                {message.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
+    <>
+      <div className="flex flex-col h-screen bg-gray-50 w-screen ">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between ">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-amber-200-600 rounded-lg flex items-center justify-center">
+              <img src="/vite.svg" alt="Vite Logo" className="w-4 h-4" />
+            </div>
+            <div>
+              <h1 className="font-semibold text-gray-900 line-clamp-4">
+                ShopBot
+              </h1>
+              <p className="text-xs text-gray-500">Online • Ready to help</p>
             </div>
           </div>
-        ))}
 
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-white rounded-r-2xl rounded-tl-2xl rounded-bl-sm shadow-sm border border-gray-100 px-4 py-3">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.1s" }}
-                ></div>
-                <div
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                ></div>
+          <div className="flex items-center space-x-3">
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded cursor-pointer"
+              >
+                Logout
+              </button>
+            ) : null}
+            <button className="relative p-2 text-gray-500 hover:bg-gray-100 cursor-pointer rounded-lg ">
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button className="p-2 text-gray-500 hover:bg-gray-100 cursor-pointer  rounded-lg">
+              <Filter className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${
+                message.type === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl ${
+                  message.type === "user"
+                    ? "bg-blue-600 text-white rounded-l-2xl rounded-tr-2xl rounded-br-sm"
+                    : "bg-white text-gray-900 rounded-r-2xl rounded-tl-2xl rounded-bl-sm shadow-sm border border-gray-100"
+                } px-4 py-3`}
+              >
+                <p className="text-sm">{message.content}</p>
+
+                {message.products && message.products.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                      {message.products.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs opacity-70 mt-2">
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="bg-white rounded-r-2xl rounded-tl-2xl rounded-bl-sm shadow-sm border border-gray-100 px-4 py-3">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="bg-white border-t border-gray-200 p-4">
+          <div className="flex items-center space-x-3">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                placeholder="Ask about products, prices, or anything else..."
+                className="w-full px-4 py-3 pr-12 bg-gray-100  rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+              />
+              <button className="absolute right-3 top-1/2 transform -translate-y-1/2 ">
+                <Search className="w-4 h-4 text-gray-500 hover:bg-gray-100   " />
+              </button>
+            </div>
+            <button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim()}
+              className="p-3 bg-blue-600 hover:bg-blue-700   disabled:bg-gray-300 disabled:text-gray-500 text-gray-100 cursor-pointer  rounded-2xl transition-colors"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mt-3">
+            {[
+              "Show headphones",
+              "Fitness watches",
+              "Gaming gear",
+              "Budget items",
+            ].map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => setInputValue(suggestion)}
+                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full cursor-pointer transition-colors"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Modal */}
+        {showProductModal && selectedProduct && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">Product Details</h2>
+                  <button
+                    onClick={() => setShowProductModal(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <ProductCard product={selectedProduct} isInModal={true} />
+
+                <div className="mt-6 flex space-x-3">
+                  <button
+                    onClick={() => {
+                      addToCart(selectedProduct);
+                      setShowProductModal(false);
+                    }}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+                  >
+                    Add to Cart
+                  </button>
+                  <button className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium transition-colors">
+                    Buy Now
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="bg-white border-t border-gray-200 p-4">
-        <div className="flex items-center space-x-3">
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              placeholder="Ask about products, prices, or anything else..."
-              className="w-full px-4 py-3 pr-12 bg-gray-100  rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
-            />
-            <button className="absolute right-3 top-1/2 transform -translate-y-1/2 ">
-              <Search className="w-4 h-4 text-gray-500 hover:bg-gray-100   " />
-            </button>
-          </div>
-          <button
-            onClick={handleSendMessage}
-            disabled={!inputValue.trim()}
-            className="p-3 bg-blue-600 hover:bg-blue-700   disabled:bg-gray-300 disabled:text-gray-500 text-gray-100 cursor-pointer  rounded-2xl transition-colors"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mt-3">
-          {[
-            "Show headphones",
-            "Fitness watches",
-            "Gaming gear",
-            "Budget items",
-          ].map((suggestion) => (
-            <button
-              key={suggestion}
-              onClick={() => setInputValue(suggestion)}
-              className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full cursor-pointer transition-colors"
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Product Modal */}
-      {showProductModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Product Details</h2>
-                <button
-                  onClick={() => setShowProductModal(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <ProductCard product={selectedProduct} isInModal={true} />
-
-              <div className="mt-6 flex space-x-3">
-                <button
-                  onClick={() => {
-                    addToCart(selectedProduct);
-                    setShowProductModal(false);
-                  }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-                >
-                  Add to Cart
-                </button>
-                <button className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium transition-colors">
-                  Buy Now
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {isLoggedIn ? null : (
+        <AuthModal
+          isOpen={showModal}
+          onClose={() => {
+            setIsLoggedIn(!!localStorage.getItem("access"));
+            setShowModal(false);
+          }}
+          onAuthChange={(e) => console.log(e)}
+        />
       )}
-    </div>
+    </>
   );
 };
 
