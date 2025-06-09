@@ -2,7 +2,7 @@ import { useState } from "react";
 import { User, AlertCircle, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 interface LoginFormProps {
-  onLoginSuccess: (access: string, refresh: string) => void;
+  onLoginSuccess: (access: string) => void;
 }
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [username, setUsername] = useState("");
@@ -33,7 +33,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
 
-      onLoginSuccess(data.access, data.refresh);
+      onLoginSuccess(data.access);
     } catch (err: unknown) {
       setError((err as Error).message || "Something went wrong");
     } finally {
