@@ -75,7 +75,7 @@ const EcommerceChatbot = () => {
     {
       const accessToken = localStorage.getItem("access");
       if (isLoggedIn && accessToken) {
-        fetch("http://localhost:8000/api/products/", {
+        fetch("https://shopbot-jla9.onrender.com/api/products/", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

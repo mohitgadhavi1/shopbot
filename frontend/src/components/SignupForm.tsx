@@ -59,11 +59,14 @@ export function SignupForm({ onLoginSuccess }: SignupFormProps) {
 
     try {
       // Step 1: Signup
-      const res = await fetch("http://localhost:8000/api/auth/signup/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
-      });
+      const res = await fetch(
+        "http://https://shopbot-jla9.onrender.com/api/auth/signup/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        }
+      );
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -77,11 +80,14 @@ export function SignupForm({ onLoginSuccess }: SignupFormProps) {
       }
 
       // Step 2: Login to get JWT tokens
-      const loginRes = await fetch("http://localhost:8000/api/token/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      const loginRes = await fetch(
+        "http://https://shopbot-jla9.onrender.com/api/token/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
       if (!loginRes.ok) {
         throw new Error("Signup succeeded but login failed");
